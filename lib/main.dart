@@ -7,6 +7,7 @@ import 'logic/game_state.notifier.dart';
 import 'game/caro_theme.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const ProviderScope(child: CaroApp()));
 }
 
@@ -131,7 +132,7 @@ class _MatchmakingButton extends ConsumerWidget {
                 Text('TÌM ĐỐI THỦ...', style: TextStyle(fontSize: 18)),
               ],
             )
-          : const Text('GIÁP CHIẾN', style: TextStyle(fontSize: 20)),
+          : const Text('CHƠI', style: TextStyle(fontSize: 20)),
     );
   }
 }

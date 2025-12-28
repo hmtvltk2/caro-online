@@ -8,9 +8,22 @@ class NakamaService {
   nk.Session? _session;
   nk.NakamaWebsocketClient? _socket;
 
-  final String host = '62.169.17.57';
-  final int port = 8850;
-  final String serverKey = 'defaultkey';
+  static const String host = String.fromEnvironment(
+    'NAKAMA_HOST',
+    defaultValue: '127.0.0.1',
+  );
+  static const int port = int.fromEnvironment(
+    'NAKAMA_PORT',
+    defaultValue: 7350,
+  );
+  static const String serverKey = String.fromEnvironment(
+    'NAKAMA_SERVER_KEY',
+    defaultValue: 'defaultkey',
+  );
+  static const bool ssl = bool.fromEnvironment(
+    'NAKAMA_SSL',
+    defaultValue: false,
+  );
 
   final _matchDataController = StreamController<nk.MatchData>.broadcast();
   Stream<nk.MatchData> get matchDataStream => _matchDataController.stream;
@@ -30,7 +43,7 @@ class NakamaService {
       host: host,
       httpPort: port,
       serverKey: serverKey,
-      ssl: false,
+      ssl: ssl,
     );
   }
 
@@ -41,7 +54,7 @@ class NakamaService {
     _socket = nk.NakamaWebsocketClient.init(
       host: host,
       port: port,
-      ssl: false,
+      ssl: ssl,
       token: _session!.token,
     );
 
