@@ -9,7 +9,7 @@ class CaroTheme {
 
   static const double gridStrokeWidth = 1.0;
   static const double pieceStrokeWidth = 4.0;
-  static const double cellSize = 40.0;
+  static const double cellSize = 25.0;
 }
 
 enum PlayerType { x, o }

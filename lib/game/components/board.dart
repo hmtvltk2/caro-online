@@ -10,8 +10,8 @@ class CaroBoard extends PositionComponent with TapCallbacks {
   final double cellSize;
 
   CaroBoard({
-    this.rows = 15,
-    this.cols = 15,
+    this.rows = 50,
+    this.cols = 50,
     this.cellSize = CaroTheme.cellSize,
   }) : super(size: Vector2(cols * cellSize, rows * cellSize));
 
@@ -23,10 +23,7 @@ class CaroBoard extends PositionComponent with TapCallbacks {
       ..style = PaintingStyle.stroke;
 
     // Draw background
-    canvas.drawRect(
-      size.toRect(),
-      Paint()..color = CaroTheme.backgroundColor,
-    );
+    canvas.drawRect(size.toRect(), Paint()..color = CaroTheme.backgroundColor);
 
     // Draw vertical lines
     for (int i = 0; i <= cols; i++) {

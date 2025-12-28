@@ -55,7 +55,7 @@ class GameStateNotifier extends Notifier<GameState> {
   GameState build() {
     final nakama = ref.watch(nakamaServiceProvider);
     _listenToNakama(nakama);
-    return GameState(board: List.generate(15, (_) => List.filled(15, null)));
+    return GameState(board: List.generate(50, (_) => List.filled(50, null)));
   }
 
   void _listenToNakama(NakamaService nakama) {
@@ -173,7 +173,7 @@ class GameStateNotifier extends Notifier<GameState> {
 
   void reset() {
     state = GameState(
-      board: List.generate(15, (_) => List.filled(15, null)),
+      board: List.generate(50, (_) => List.filled(50, null)),
       myType: state.myType,
       isMyTurn: state.myType == PlayerType.x,
     );
