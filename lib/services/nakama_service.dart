@@ -106,15 +106,19 @@ class NakamaService {
   }
 
   void sendMove(String matchId, int x, int y, int opCode) {
+    sendMatchData(matchId, opCode, {'x': x, 'y': y});
+  }
+
+  void sendMatchData(String matchId, int opCode, Map<String, dynamic> payload) {
     if (_socket == null) {
-      print('NakamaService: [ERROR] Cannot send move, socket is NULL');
+      print('NakamaService: [ERROR] Cannot send match data, socket is NULL');
       return;
     }
 
     try {
-      final data = jsonEncode({'x': x, 'y': y});
+      final data = jsonEncode(payload);
       print(
-        'NakamaService: [TX] Sending move to match $matchId (opCode: $opCode): $data',
+        'NakamaService: [TX] Sending data to match $matchId (opCode: $opCode): $data',
       );
       _socket!.sendMatchData(
         matchId: matchId,

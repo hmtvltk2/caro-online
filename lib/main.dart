@@ -53,6 +53,8 @@ class MainMenuScreen extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: 40),
+                _PlayerNameInput(),
+                const SizedBox(height: 24),
                 _MatchmakingButton(),
               ],
             ),
@@ -86,6 +88,65 @@ class MainMenuScreen extends ConsumerWidget {
               ),
             ),
         ],
+      ),
+    );
+  }
+}
+
+class _PlayerNameInput extends ConsumerStatefulWidget {
+  @override
+  ConsumerState<_PlayerNameInput> createState() => _PlayerNameInputState();
+}
+
+class _PlayerNameInputState extends ConsumerState<_PlayerNameInput> {
+  late final TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    final currentName = ref.read(gameStateProvider).playerName;
+    _controller = TextEditingController(text: currentName);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    ref.listen(gameStateProvider.select((s) => s.playerName), (previous, next) {
+      if (next != _controller.text) {
+        _controller.text = next;
+      }
+    });
+
+    return SizedBox(
+      width: 300,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: TextField(
+          controller: _controller,
+          onChanged: (value) {
+            ref.read(gameStateProvider.notifier).updatePlayerName(value);
+          },
+          decoration: InputDecoration(
+            labelText: 'Tên của bạn',
+            labelStyle: TextStyle(color: CaroTheme.playerXColor),
+            suffixIcon: Icon(Icons.edit, color: CaroTheme.playerXColor),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: CaroTheme.playerXColor),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: CaroTheme.playerXColor, width: 2),
+            ),
+          ),
+          textAlign: TextAlign.center,
+          style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.w500),
+        ),
       ),
     );
   }
@@ -145,7 +206,7 @@ class GameScreen extends ConsumerStatefulWidget {
 }
 
 class _GameScreenState extends ConsumerState<GameScreen> {
-  late final CaroGame game;
+  late CaroGame game;
 
   @override
   void initState() {
@@ -164,8 +225,8 @@ class _GameScreenState extends ConsumerState<GameScreen> {
           children: [
             Text(
               gameState.winner != null
-                  ? 'Người thắng: ${gameState.winner == PlayerType.x ? "X" : "O"}'
-                  : 'Lượt: ${gameState.currentTurn == PlayerType.x ? "X" : "O"}',
+                  ? 'Người thắng: ${gameState.winner == gameState.myType ? "BẠN" : (gameState.opponentName ?? "Đối thủ")}'
+                  : 'Lượt: ${gameState.isMyTurn ? "BẠN" : (gameState.opponentName ?? "Đối thủ")}',
               style: TextStyle(
                 fontSize: 18,
                 color: gameState.currentTurn == PlayerType.x
@@ -175,7 +236,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
               ),
             ),
             Text(
-              'Bạn là: ${gameState.myType == PlayerType.x ? "X" : "O"} (${gameState.isMyTurn ? "Tới lượt" : "Chờ..."})',
+              '${gameState.playerName} (Bạn) vs ${gameState.opponentName ?? "Đang chờ..."} (Đối thủ)',
               style: const TextStyle(fontSize: 12, color: Colors.grey),
             ),
           ],

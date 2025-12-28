@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nakama/nakama.dart' as nk;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import '../game/caro_theme.dart';
 import 'win_condition_checker.dart';
@@ -15,6 +16,8 @@ class GameState {
   final (int, int)? lastMove;
   final String? matchId;
   final bool isSearching;
+  final String playerName;
+  final String? opponentName;
 
   GameState({
     required this.board,
@@ -25,6 +28,8 @@ class GameState {
     this.lastMove,
     this.matchId,
     this.isSearching = false,
+    this.playerName = 'Chó con',
+    this.opponentName,
   });
 
   GameState copyWith({
@@ -36,6 +41,8 @@ class GameState {
     (int, int)? lastMove,
     String? matchId,
     bool? isSearching,
+    String? playerName,
+    String? opponentName,
   }) {
     return GameState(
       board: board ?? this.board,
@@ -46,6 +53,8 @@ class GameState {
       lastMove: lastMove ?? this.lastMove,
       matchId: matchId ?? this.matchId,
       isSearching: isSearching ?? this.isSearching,
+      playerName: playerName ?? this.playerName,
+      opponentName: opponentName ?? this.opponentName,
     );
   }
 }
@@ -55,7 +64,22 @@ class GameStateNotifier extends Notifier<GameState> {
   GameState build() {
     final nakama = ref.watch(nakamaServiceProvider);
     _listenToNakama(nakama);
+    _loadPlayerName();
     return GameState(board: List.generate(50, (_) => List.filled(50, null)));
+  }
+
+  Future<void> _loadPlayerName() async {
+    final prefs = await SharedPreferences.getInstance();
+    final name = prefs.getString('player_name');
+    if (name != null) {
+      state = state.copyWith(playerName: name);
+    }
+  }
+
+  Future<void> updatePlayerName(String name) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('player_name', name);
+    state = state.copyWith(playerName: name);
   }
 
   void _listenToNakama(NakamaService nakama) {
@@ -75,6 +99,10 @@ class GameStateNotifier extends Notifier<GameState> {
             final int x = decoded['x'];
             final int y = decoded['y'];
             _handleRemoteMove(x, y);
+          } else if (opCodeStr == '2') {
+            final String name = decoded['name'];
+            state = state.copyWith(opponentName: name);
+            print('Opponent name received: $name');
           }
         } catch (e) {
           print('GameStateNotifier: [ERROR] Failed to decode match data: $e');
@@ -120,6 +148,9 @@ class GameStateNotifier extends Notifier<GameState> {
         isMyTurn: myType == PlayerType.x,
         isSearching: false,
       );
+
+      // Share our name with the opponent
+      nakama.sendMatchData(match.matchId, 2, {'name': state.playerName});
     });
   }
 
